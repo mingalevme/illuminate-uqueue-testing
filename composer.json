@@ -10,7 +10,6 @@
         "illuminate/redis": "^5.6",
         "laravel/lumen-framework": "5.6.*",
         "laravel/scout": "^4.0",
-        "mingalevme/illuminate-uqueue": "^1.0",
         "vlucas/phpdotenv": "~2.2"
     },
     "require-dev": {
