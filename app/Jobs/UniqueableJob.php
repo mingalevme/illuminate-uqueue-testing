@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Mingalevme\Illuminate\UQueue\Jobs\Uniqueable;
 
-class Job implements Uniqueable, ShouldQueue
+class UniqueableJob implements Uniqueable, ShouldQueue
 {
     use InteractsWithQueue, Queueable, SerializesModels;
 

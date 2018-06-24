@@ -3,7 +3,7 @@
 namespace Tests;
 
 use App\Jobs\HandlingPost;
-use App\Jobs\Job;
+use App\Jobs\UniqueableJob;
 use App\Post;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
@@ -16,8 +16,8 @@ class RedisTest extends \TestCase
 
         Redis::command('DEL', ['queues:default']);
 
-        $id1 = Queue::push(new Job(['foo' => 'bar']));
-        $id2 = Queue::push(new Job(['foo' => 'bar']));
+        $id1 = Queue::push(new UniqueableJob(['foo' => 'bar']));
+        $id2 = Queue::push(new UniqueableJob(['foo' => 'bar']));
 
         $this->assertNotNull($id1);
         $this->assertNotNull($id2);
@@ -25,7 +25,7 @@ class RedisTest extends \TestCase
 
         $this->assertCount(1, Redis::command('ZRANGE', ['queues:default', 0, -1]));
 
-        $id3 = Queue::push(new Job(['foo2' => 'bar2']));
+        $id3 = Queue::push(new UniqueableJob(['foo2' => 'bar2']));
 
         $this->assertNotSame($id1, $id3);
 

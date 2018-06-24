@@ -3,7 +3,8 @@
 namespace Tests;
 
 use App\Jobs\HandlingPost;
-use App\Jobs\Job;
+use App\Jobs\SimpleJob;
+use App\Jobs\UniqueableJob;
 use App\Post;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -17,12 +18,31 @@ class DatabaseTest extends \TestCase
         //$this->seed();
     }
 
-    public function testSimple()
+    public function testSimpleJob()
     {
         Queue::setDefaultDriver('database');
 
-        $id1 = Queue::push(new Job(['foo' => 'bar']));
-        $id2 = Queue::push(new Job(['foo' => 'bar']));
+        $id1 = Queue::push(new SimpleJob(['foo' => 'bar']));
+        $id2 = Queue::push(new SimpleJob(['foo' => 'bar']));
+
+        $this->assertNotNull($id1);
+        $this->assertNotNull($id2);
+        $this->assertNotSame($id1, $id2);
+
+        $this->assertCount(2, DB::select('SELECT * FROM jobs'));
+
+        Queue::pop()->fire();
+        Queue::pop()->fire();
+
+        $this->assertCount(0, DB::select('SELECT * FROM jobs'));
+    }
+
+    public function testUniqueableJob()
+    {
+        Queue::setDefaultDriver('database');
+
+        $id1 = Queue::push(new UniqueableJob(['foo' => 'bar']));
+        $id2 = Queue::push(new UniqueableJob(['foo' => 'bar']));
 
         $this->assertNotNull($id1);
         $this->assertNotNull($id2);
@@ -30,14 +50,19 @@ class DatabaseTest extends \TestCase
 
         $this->assertCount(1, DB::select('SELECT * FROM jobs'));
 
-        $id3 = Queue::push(new Job(['foo2' => 'bar2']));
+        $id3 = Queue::push(new UniqueableJob(['foo2' => 'bar2']));
 
         $this->assertNotSame($id1, $id3);
 
         $this->assertCount(2, DB::select('SELECT * FROM jobs'));
+
+        Queue::pop()->fire();
+        Queue::pop()->fire();
+
+        $this->assertCount(0, DB::select('SELECT * FROM jobs'));
     }
 
-    public function testScout()
+    public function testUniqueableJobWithScout()
     {
         Queue::setDefaultDriver('database');
 
